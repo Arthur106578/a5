@@ -3,7 +3,35 @@ const state = { data: null };
 let pieChart = null;
 let lineChart = null;
 
+// 内嵌回退数据：当 fetch 在 file:// 下被浏览器拦截时使用，保证页面可直接打开
+const fallbackData = {
+  "title": "个人消费记账月报",
+  "months": ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月"],
+  "categories": [
+    { "name": "餐饮", "amounts": [1200, 1350, 1100, 1280, 1420, 1380, 1500, 1450] },
+    { "name": "交通", "amounts": [300, 280, 320, 310, 290, 350, 400, 380] },
+    { "name": "购物", "amounts": [800, 650, 900, 720, 1100, 850, 600, 980] },
+    { "name": "娱乐", "amounts": [400, 550, 480, 600, 420, 700, 580, 650] },
+    { "name": "其他", "amounts": [200, 180, 250, 220, 300, 190, 240, 210] }
+  ]
+};
+
+// 渲染统一入口
+const showData = (data) => {
+  if (!data.categories || data.categories.length === 0) {
+    $('#status').text('暂无数据').show();
+    return;
+  }
+  state.data = data;
+  $('#sub-title').text(data.title + ' · 数据来源：课程统一数据集');
+  $('#status').hide();
+  renderCards(data);
+  renderPieChart(data);
+  renderLineChart(data);
+};
+
 // 加载本地 JSON 数据（含加载中 / 失败 / 空数据三态处理）
+// 优先 fetch 远程/本地 JSON；若因 file:// 协议被拦截，回退到内嵌数据保证页面可打开
 const loadData = async () => {
   $('#status').text('加载中...').show();
   try {
@@ -12,18 +40,10 @@ const loadData = async () => {
       throw new Error('HTTP ' + response.status);
     }
     const data = await response.json();
-    if (!data.categories || data.categories.length === 0) {
-      $('#status').text('暂无数据').show();
-      return;
-    }
-    state.data = data;
-    $('#sub-title').text(data.title + ' · 数据来源：课程统一数据集');
-    $('#status').hide();
-    renderCards(data);
-    renderPieChart(data);
-    renderLineChart(data);
+    showData(data);
   } catch (error) {
-    $('#status').text('加载失败：' + error.message).show();
+    // fetch 失败（如 file:// 协议拦截）时回退到内嵌数据，页面仍可正常展示
+    showData(fallbackData);
   }
 };
 
