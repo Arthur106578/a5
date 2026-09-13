@@ -81,7 +81,40 @@ const renderPieChart = (data) => {
   });
 };
 
-// 图表占位：后续步骤实现
-const renderLineChart = (data) => {};
+// Chart.js 折线图：月度消费趋势（适合展示时间变化）
+const renderLineChart = (data) => {
+  if (lineChart !== null) {
+    lineChart.destroy();
+  }
+  const ctx = document.querySelector('#line-chart');
+  lineChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: data.months,
+      datasets: data.categories.map(c => ({
+        label: c.name,
+        data: c.amounts,
+        borderWidth: 1
+      }))
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        title: { display: true, text: '月度消费趋势（单位：元）' }
+      }
+    }
+  });
+};
+
+// jQuery 事件委托：点击卡片切换高亮
+$('#cards').on('click', '.card', function () {
+  $(this).toggleClass('border-primary shadow');
+});
+
+// 窗口缩放：ECharts 需手动 resize，Chart.js 响应式自动处理
+window.addEventListener('resize', () => {
+  if (pieChart) pieChart.resize();
+});
 
 loadData();
