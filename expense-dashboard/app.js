@@ -58,8 +58,30 @@ const renderCards = (data) => {
   });
 };
 
+// ECharts 饼图：各品类消费占比（适合展示比例关系）
+const renderPieChart = (data) => {
+  if (pieChart === null) {
+    pieChart = echarts.init(document.querySelector('#pie-chart'));
+  }
+  const pieData = data.categories.map(c => ({
+    name: c.name,
+    value: c.amounts.reduce((sum, n) => sum + n, 0)
+  }));
+  pieChart.setOption({
+    title: { text: '各品类消费占比', left: 'center' },
+    tooltip: { trigger: 'item', formatter: '{b}: {c} 元 ({d}%)' },
+    legend: { bottom: 0 },
+    series: [{
+      name: '消费占比',
+      type: 'pie',
+      radius: ['40%', '70%'],
+      data: pieData,
+      label: { formatter: '{b}\n{d}%' }
+    }]
+  });
+};
+
 // 图表占位：后续步骤实现
-const renderPieChart = (data) => {};
 const renderLineChart = (data) => {};
 
 loadData();
