@@ -1,6 +1,7 @@
 // app.js
 const state = { data: null };
 let barChart = null;
+let lineChart = null;
 
 const loadData = async () => {
   $('#status').text('加载中...').show();
@@ -43,8 +44,36 @@ const renderCards = (data) => {
   });
 };
 
-// 图表占位：后续步骤实现 Chart.js 折线图
-const renderLineChart = (data) => {};
+// Chart.js 折线图：借阅趋势
+const renderLineChart = (data) => {
+  if (lineChart !== null) {
+    lineChart.destroy();               // 防重复初始化
+  }
+  const ctx = document.querySelector('#line-chart');
+  lineChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: data.months,
+      datasets: data.series.map(s => ({
+        label: s.category,
+        data: s.counts,
+        borderWidth: 1
+      }))
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        title: { display: true, text: '借阅趋势（单位：册）' }
+      }
+    }
+  });
+};
+
+// 窗口尺寸变化：ECharts 需手动 resize，Chart.js 响应式默认自动处理
+window.addEventListener('resize', () => {
+  if (barChart) barChart.resize();
+});
 
 // ECharts 柱状图：各月各品类借阅量
 const renderBarChart = (data) => {
