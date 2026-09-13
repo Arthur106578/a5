@@ -94,4 +94,9 @@ const renderBarChart = (data) => {
   });
 };
 
+// jQuery 事件委托：点击卡片切换高亮（蓝色边框 + 阴影）
+$('#cards').on('click', '.card', function () {
+  $(this).toggleClass('border-primary shadow');
+});
+
 loadData();
